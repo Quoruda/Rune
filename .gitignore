@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Rust build artifacts
+target/
+native/target/
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# IPC Sockets and locks
+/tmp/rune*.sock
+/tmp/rune.lock
+
+# Media / temporary test files
+*.mp4
+*.mkv
+*.avi
+!assets/*.gif

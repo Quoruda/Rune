@@ -1,8 +1,4 @@
-textual
-opencv-python
-numpy
-pyte
-ipc
-textual-markdown
 textual[syntax]
 pillow
+opencv-python
+maturin
