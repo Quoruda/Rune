@@ -39,6 +39,9 @@ class PTYWidget(Window):
 
         env = os.environ.copy()
         env["RUNE_SOCKET"] = "/tmp/rune.sock"
+        env["USER"] = "rune"
+        env["LOGNAME"] = "rune"
+        env["PROMPT_COMMAND"] = "PS1='\\[\\033[1;36m\\]rune\\[\\033[0m\\]:\\[\\033[1;34m\\]\\W\\[\\033[0m\\]$ '"
 
         bin_dir = os.path.abspath("bin")
         env["PATH"] = f"{bin_dir}:{env.get('PATH', '')}"
