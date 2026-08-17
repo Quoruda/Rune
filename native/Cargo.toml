@@ -5,7 +5,7 @@ edition = "2021"
 
 [lib]
 name = "native"
-# Indique à Rust de compiler un binaire dynamique (.so/.pyd) pour Python
+# Build dynamic C library (.so / .pyd) for Python
 crate-type = ["cdylib"]
 
 [dependencies]
