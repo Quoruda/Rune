@@ -4,7 +4,7 @@ from textual.strip import Strip
 from rich.segment import Segment
 from rich.text import Text
 from textual.app import ComposeResult
-import native
+from core.native import ImageEngine
 
 from core.window import Window
 
@@ -86,7 +86,7 @@ class ImageViewer(Window):
             rgb_img = resized_img.convert("RGB")
             rgb_bytes = rgb_img.tobytes()
 
-            engine = native.ImageEngine(w, h)
+            engine = ImageEngine(w, h)
             ansi_str = engine.render_frame(rgb_bytes)
 
             text = Text.from_ansi(ansi_str)

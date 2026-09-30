@@ -10,7 +10,7 @@ from textual import events
 from textual.strip import Strip
 from rich.segment import Segment
 from rich.text import Text
-import native
+from core.native import ImageEngine
 
 from core.window import Window
 
@@ -242,7 +242,7 @@ class VideoPlayer(Window):
         rgb_frame = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
         rgb_bytes = rgb_frame.tobytes()
         
-        engine = native.ImageEngine(rw, rh)
+        engine = ImageEngine(rw, rh)
         ansi_frame = engine.render_frame(rgb_bytes)
         
         text = Text.from_ansi(ansi_frame)

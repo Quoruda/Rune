@@ -9,7 +9,7 @@ from textual import events
 from textual.strip import Strip
 from rich.segment import Segment
 from rich.style import Style
-import native
+from core.native import TerminalEngine
 
 from core.window import Window
 
@@ -29,7 +29,7 @@ class PTYWidget(Window):
         rows = self.content_size.height or 24
         cols = self.content_size.width or 80
 
-        self._terminal = native.TerminalEngine(cols, rows)
+        self._terminal = TerminalEngine(cols, rows)
 
         self.master_fd, slave_fd = pty.openpty()
         self._set_pty_size(rows, cols)

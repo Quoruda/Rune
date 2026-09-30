@@ -56,6 +56,7 @@ Rune is a lightweight Text User Interface (TUI) Desktop Environment and window m
 │   ├── application_manager.py # Window registry and lifecycle supervisor
 │   ├── image_viewer.py        # ASCII image & GIF renderer
 │   ├── music_player.py        # MPV audio player with visualizer
+│   ├── native.py              # Native Rust engine bindings & fallbacks
 │   ├── pty_widget.py          # Native terminal multiplexer backend
 │   ├── video_player.py        # Video player with synchronized audio
 │   ├── registry.py            # Application registry dictionary
@@ -64,10 +65,11 @@ Rune is a lightweight Text User Interface (TUI) Desktop Environment and window m
 │   ├── text_editor.py         # Code editor with modal dialogs
 │   ├── window.py              # Window container base class
 │   └── workspace.py           # Horizontal docking workspace
-├── native/
-│   ├── src/                   # Rust source code (VT100 & image engine)
-│   ├── Cargo.toml             # Rust package configuration
-│   └── pyproject.toml         # Maturin build configuration
+├── crates/
+│   └── native/
+│       ├── src/               # Rust source code (VT100 & image engine)
+│       ├── Cargo.toml         # Rust package configuration
+│       └── pyproject.toml     # Maturin build configuration
 ├── main.py                    # Application entry point
 └── requirements.txt           # Python dependencies
 ```
@@ -100,22 +102,27 @@ Rune runs an internal UNIX domain socket stream at `/tmp/rune.sock`. The compani
 ### Prerequisites
 
 - **Linux** (TTY console or terminal emulator)
-- **Python 3.10+**
+- **Python 3.10+** (with `python3-venv`)
 - **Rust Toolchain (`cargo`, `rustc`)**: Required to compile the native module.
 - **mpv**: Required for audio playback.
 
-### 1. Install Python Dependencies
+### 1. Set Up Virtual Environment & Dependencies
 
 ```bash
+# Create and activate a Python virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install Python requirements
 pip install -r requirements.txt
 ```
 
 ### 2. Build the Native Extension
 
-Compile and install the Rust native module using Maturin:
+Compile and install the Rust native module into your virtual environment using Maturin:
 
 ```bash
-cd native && maturin develop --release
+cd crates/native && maturin develop --release && cd ../..
 ```
 
 ### 3. Launch Rune

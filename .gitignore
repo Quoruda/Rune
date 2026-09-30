@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+*.pyd
 
 # Virtual environments
 .venv/
@@ -11,6 +13,7 @@ venv/
 # Rust build artifacts
 target/
 native/target/
+crates/**/target/
 
 # IDE & Editor files
 .idea/
@@ -27,3 +30,4 @@ native/target/
 *.mkv
 *.avi
 !assets/*.gif
+.tests/

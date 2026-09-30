@@ -1,10 +1,10 @@
 [package]
-name = "native"
+name = "rune-native"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "native"
+name = "rune_native"
 # Build dynamic C library (.so / .pyd) for Python
 crate-type = ["cdylib"]
 

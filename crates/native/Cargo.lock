@@ -63,14 +63,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "native"
-version = "0.1.0"
-dependencies = [
- "pyo3",
- "vt100",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -161,6 +153,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "41f2619966050689382d2b44f664f4bc593e129785a36d6ee376ddf37259b924"
 dependencies = [
  "proc-macro2",
+]
+
+[[package]]
+name = "rune-native"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "vt100",
 ]
 
 [[package]]

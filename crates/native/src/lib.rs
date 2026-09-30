@@ -109,7 +109,7 @@ impl TerminalEngine {
 }
 
 #[pymodule]
-fn native(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn rune_native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<TerminalEngine>()?;
     m.add_class::<ImageEngine>()?;
     Ok(())
