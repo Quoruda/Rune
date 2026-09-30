@@ -1,8 +1,8 @@
-from core.pty_widget import PTYWidget
-from core.text_editor import TextEditor
-from core.image_viewer import ImageViewer
-from core.music_player import MusicPlayer
-from core.video_player import VideoPlayer
+from apps.terminal.terminal import PTYWidget
+from apps.editor.editor import TextEditor
+from apps.image_viewer.image_viewer import ImageViewer
+from apps.music_player.music_player import MusicPlayer
+from apps.video_player.video_player import VideoPlayer
 
 APP_REGISTRY = [
     {

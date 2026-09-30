@@ -4,7 +4,6 @@ from textual.containers import Horizontal
 from textual.binding import Binding
 from textual import events
 from core.application_manager import ApplicationManager
-from core.pty_widget import PTYWidget
 from core.taskbar import Taskbar
 from core.window import Window
 from core.workspace import Workspace
