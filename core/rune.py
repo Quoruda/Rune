@@ -1,3 +1,4 @@
+from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
 from textual.binding import Binding
@@ -183,7 +184,8 @@ class Rune(App):
         if os.path.exists(self.SOCKET_PATH):
             os.remove(self.SOCKET_PATH)
 
-    def action_close_active_window(self) -> None:
+    @work
+    async def action_close_active_window(self) -> None:
         focused = self.focused
         if not focused:
             return
@@ -198,6 +200,15 @@ class Rune(App):
                     break
 
         if current_window:
+            if not await current_window.confirm_close():
+                return
             if current_window in self.manager.applications:
                 self.manager.applications.remove(current_window)
             current_window.remove()
+    @work
+    async def action_quit(self) -> None:
+        for window in list(self.manager.applications):
+            if not await window.confirm_close():
+                window.focus()
+                return
+        self.exit()

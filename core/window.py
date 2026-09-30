@@ -39,3 +39,5 @@ class Window(Widget):
     async def on_unmount(self) -> None:
         if self.has_class("zoomed"):
             self.app.remove_class("zoom-active")
+    async def confirm_close(self) -> bool:
+        return True
