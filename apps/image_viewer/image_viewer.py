@@ -12,7 +12,7 @@ from core.window import Window
 class ImageViewer(Window):
 
     def __init__(self, *args, **kwargs):
-        super().__init__("Image Viewer", "#")
+        super().__init__("Image Viewer", "🖼️")
         self.file_path = args[0] if args else None
         self.frames = []
         self.durations = []

@@ -18,7 +18,7 @@ class FileManager(Window):
         self.set_interval(1, self.refresh_tree)
 
     def __init__(self, start_path: str | Path = "."):
-        super().__init__("Files", "F")
+        super().__init__("Files", "📁")
         self.path = Path(start_path).resolve()
         self.path_label = Label(str(self.path), id="path-header")        
         self.directory_tree = DirectoryTree(self.path, id="file-tree")

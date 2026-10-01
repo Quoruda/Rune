@@ -17,7 +17,7 @@ from core.window import Window
 class PTYWidget(Window):
 
     def __init__(self, *args, **kwargs):
-        super().__init__("Terminal", "$")
+        super().__init__("Terminal", "💻")
         self.command = list(args) if args else ["bash"]
         self.master_fd = None
         self.process = None

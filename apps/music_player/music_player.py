@@ -60,7 +60,7 @@ class MusicPlayer(Window):
     """
 
     def __init__(self, *args, **kwargs):
-        super().__init__("Music Player", ">")
+        super().__init__("Music Player", "🎵")
         self.file_path = args[0] if args else None
         self.process = None
         self.reader = None

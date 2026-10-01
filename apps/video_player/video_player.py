@@ -30,7 +30,7 @@ def format_time(seconds: float) -> str:
 class VideoPlayer(Window):
 
     def __init__(self, *args, **kwargs):
-        super().__init__("Watcher", "W")
+        super().__init__("Watcher", "🎬")
         self.file_path = args[0] if args else None
         
         # MPV Audio control

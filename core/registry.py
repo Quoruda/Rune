@@ -8,37 +8,37 @@ from apps.file_manager.file_manager import FileManager
 APP_REGISTRY = [
     {
         "name": "Terminal",
-        "icon": "$",
+        "icon": "💻",
         "class": PTYWidget,
         "description": "Linux terminal emulator",
     },
     {
         "name": "Editor",
-        "icon": "≡",
+        "icon": "📝",
         "class": TextEditor,
         "description": "Powerful source code and text editor",
     },
     {
         "name": "Viewer",
-        "icon": "#",
+        "icon": "🖼️",
         "class": ImageViewer,
         "description": "High-performance image viewer",
     },
     {
         "name": "Player",
-        "icon": ">",
+        "icon": "🎵",
         "class": MusicPlayer,
         "description": "Headless audio player via MPV",
     },
     {
         "name": "Watcher",
-        "icon": "W",
+        "icon": "🎬",
         "class": VideoPlayer,
         "description": "High-performance ASCII video player",
     },
     {
         "name": "Files",
-        "icon": "F",
+        "icon": "📁",
         "class": FileManager,
         "description": "Navigate and open files",
     }
