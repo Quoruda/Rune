@@ -1,3 +1,5 @@
+import mimetypes
+from pathlib import Path
 from textual import work
 from textual.app import App, ComposeResult
 from textual.containers import Horizontal
@@ -15,6 +17,31 @@ import os
 import sys
 import fcntl
 
+
+
+def resolve_file_app(file_path: str | Path) -> str:
+    path_str = str(file_path)
+    ext = os.path.splitext(path_str)[1].lower()
+
+    if ext in ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']:
+        return "viewer"
+    elif ext in ['.mp3', '.wav', '.ogg', '.flac', '.m4a']:
+        return "player"
+    elif ext in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
+        return "watcher"
+    elif ext in ['.txt', '.py', '.rs', '.md', '.json', '.toml', '.yaml', '.yml', '.sh', '.js', '.ts', '.css', '.html']:
+        return "editor"
+    else:
+        mimetypes.init()
+        mime_type, _ = mimetypes.guess_type(path_str)
+        if mime_type:
+            if mime_type.startswith("image/"):
+                return "viewer"
+            elif mime_type.startswith("audio/"):
+                return "player"
+            elif mime_type.startswith("video/"):
+                return "watcher"
+        return "editor"
 
 class Rune(App):
     ENABLE_COMMAND_PALETTE = False
@@ -158,17 +185,28 @@ class Rune(App):
             data = await reader.read(4096)
             if data:
                 payload = json.loads(data.decode())
-                if payload.get("action") == "run":
+                action = payload.get("action")
+                if action == "run":
                     self.call_later(
                         self._open_app_by_name,
                         payload.get("app"),
                         payload.get("args", [])
+                    )
+                elif action == "open":
+                    self.call_later(
+                        self.open_file,
+                        payload.get("path")
                     )
         except Exception:
             pass
         finally:
             writer.close()
             await writer.wait_closed()
+
+    def open_file(self, file_path: str | Path) -> None:
+        abs_path = str(Path(file_path).resolve())
+        app_name = resolve_file_app(abs_path)
+        self._open_app_by_name(app_name, [abs_path])
 
     def _open_app_by_name(self, name: str, args: list = None) -> None:
         args = args or []

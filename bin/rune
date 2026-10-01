@@ -45,38 +45,10 @@ def main():
             sys.exit(1)
 
         abs_path = os.path.abspath(file_path)
-        ext = os.path.splitext(abs_path)[1].lower()
-
-        # Map file extension to corresponding system application
-        if ext in ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']:
-            app_name = "viewer"
-        elif ext in ['.mp3', '.wav', '.ogg', '.flac', '.m4a']:
-            app_name = "player"
-        elif ext in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-            app_name = "watcher"
-        elif ext in ['.txt', '.py', '.rs', '.md', '.json', '.toml', '.yaml', '.yml', '.sh', '.js', '.ts', '.css', '.html']:
-            app_name = "editor"
-        else:
-            # Fallback to system MIME type detection
-            import mimetypes
-            mimetypes.init()
-            mime_type, _ = mimetypes.guess_type(abs_path)
-            if mime_type:
-                if mime_type.startswith("image/"):
-                    app_name = "viewer"
-                elif mime_type.startswith("audio/"):
-                    app_name = "player"
-                elif mime_type.startswith("video/"):
-                    app_name = "watcher"
-                else:
-                    app_name = "editor"
-            else:
-                app_name = "editor"
 
         payload = {
-            "action": "run",
-            "app": app_name,
-            "args": [abs_path]
+            "action": "open",
+            "path": abs_path
         }
 
         try:

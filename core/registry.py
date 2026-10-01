@@ -3,6 +3,7 @@ from apps.editor.editor import TextEditor
 from apps.image_viewer.image_viewer import ImageViewer
 from apps.music_player.music_player import MusicPlayer
 from apps.video_player.video_player import VideoPlayer
+from apps.file_manager.file_manager import FileManager
 
 APP_REGISTRY = [
     {
@@ -34,5 +35,11 @@ APP_REGISTRY = [
         "icon": "W",
         "class": VideoPlayer,
         "description": "High-performance ASCII video player",
+    },
+    {
+        "name": "Files",
+        "icon": "F",
+        "class": FileManager,
+        "description": "Navigate and open files",
     }
 ]
