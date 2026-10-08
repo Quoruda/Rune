@@ -9,12 +9,14 @@ from core.taskbar import Taskbar
 from core.window import Window
 from core.workspace import Workspace
 from core.application_launcher import ApplicationLauncher
+from core.power_menu import PowerMenuModal
 from core.registry import APP_REGISTRY
 from core.config import config
 import asyncio
 import json
 import os
 import sys
+import subprocess
 import fcntl
 
 
@@ -226,10 +228,40 @@ class Rune(App):
             if current_window in self.manager.applications:
                 self.manager.applications.remove(current_window)
             current_window.remove()
-    @work
-    async def action_quit(self) -> None:
-        for window in list(self.manager.applications):
-            if not await window.confirm_close():
-                window.focus()
-                return
-        self.exit()
+    def action_quit(self) -> None:
+        """Show the power menu instead of quitting directly."""
+        if isinstance(self.screen, PowerMenuModal):
+            self.screen.dismiss(None)
+            return
+
+        app_count = len(self.manager.applications)
+
+        async def handle_power_choice(choice: str | None) -> None:
+            if choice is None:
+                return  # Cancelled
+
+            # For all destructive actions, confirm-close every open window first
+            for window in list(self.manager.applications):
+                if not await window.confirm_close():
+                    window.focus()
+                    return
+
+            def _exec_system_power(primary: list[str], fallback: list[str]) -> None:
+                try:
+                    subprocess.Popen(primary)
+                except FileNotFoundError:
+                    try:
+                        subprocess.Popen(fallback)
+                    except Exception as err:
+                        print(f"Error executing power command: {err}", file=sys.stderr)
+
+            if choice == "quit":
+                self.exit()
+            elif choice == "reboot":
+                self.exit()
+                _exec_system_power(["systemctl", "reboot"], ["reboot"])
+            elif choice == "shutdown":
+                self.exit()
+                _exec_system_power(["systemctl", "poweroff"], ["poweroff"])
+
+        self.push_screen(PowerMenuModal(app_count), handle_power_choice)

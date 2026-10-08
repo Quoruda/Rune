@@ -26,7 +26,7 @@ class Taskbar(Widget):
 
     def compose(self) -> ComposeResult:
         yield Static(
-            "ctrl+p Launcher │ ctrl+z Zoom │ ctrl+w Close │ ctrl+arrows Navigate | ctrl+q Quit",
+            "ctrl+p Launcher │ ctrl+z Zoom │ ctrl+w Close │ ctrl+arrows Navigate │ ctrl+q Quit",
             id="shortcuts"
         )
         yield Static("", id="clock")
