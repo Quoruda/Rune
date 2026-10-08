@@ -1,0 +1,136 @@
+# ==============================================================
+#  Rune Desktop Environment — Configuration
+#  Stored at: ~/.config/rune/config.toml
+# ==============================================================
+
+[general]
+# Working directory used by default (e.g. for Terminal and FileManager)
+workspace = "~"
+
+# Applications to launch automatically at startup
+# Each entry must match a name defined in an [[apps]] block below
+autostart = ["Terminal"]
+
+
+# ==============================================================
+#  File associations
+#  Maps file extensions to an application name (must match [[apps]])
+# ==============================================================
+
+[associations]
+".txt"  = "Editor"
+".py"   = "Editor"
+".rs"   = "Editor"
+".md"   = "Editor"
+".json" = "Editor"
+".toml" = "Editor"
+".yaml" = "Editor"
+".yml"  = "Editor"
+".sh"   = "Editor"
+".js"   = "Editor"
+".ts"   = "Editor"
+".css"  = "Editor"
+".html" = "Editor"
+
+".png"  = "Viewer"
+".jpg"  = "Viewer"
+".jpeg" = "Viewer"
+".gif"  = "Viewer"
+".bmp"  = "Viewer"
+".webp" = "Viewer"
+
+".mp3"  = "Player"
+".wav"  = "Player"
+".ogg"  = "Player"
+".flac" = "Player"
+".m4a"  = "Player"
+
+".mp4"  = "Watcher"
+".mkv"  = "Watcher"
+".avi"  = "Watcher"
+".mov"  = "Watcher"
+".webm" = "Watcher"
+
+
+# ==============================================================
+#  Application registry
+#  Each [[apps]] entry declares an application available in Rune.
+#
+#  For native apps (Python/Textual):
+#    module = Python import path
+#    class  = Class name inside that module
+#
+#  For custom shell commands:
+#    command = Absolute path to an executable or script
+#
+#  enabled = false to hide from the launcher without removing the entry
+# ==============================================================
+
+[[apps]]
+name        = "Terminal"
+icon        = "💻"
+module      = "apps.terminal.terminal"
+class       = "PTYWidget"
+description = "Linux terminal emulator"
+enabled     = true
+
+[[apps]]
+name        = "Editor"
+icon        = "📝"
+module      = "apps.editor.editor"
+class       = "TextEditor"
+description = "Powerful source code and text editor"
+enabled     = true
+
+[[apps]]
+name        = "Viewer"
+icon        = "🖼️"
+module      = "apps.image_viewer.image_viewer"
+class       = "ImageViewer"
+description = "High-performance image viewer"
+enabled     = true
+
+[[apps]]
+name        = "Player"
+icon        = "🎵"
+module      = "apps.music_player.music_player"
+class       = "MusicPlayer"
+description = "Headless audio player via MPV"
+enabled     = true
+
+[[apps]]
+name        = "Watcher"
+icon        = "🎬"
+module      = "apps.video_player.video_player"
+class       = "VideoPlayer"
+description = "High-performance ASCII video player"
+enabled     = true
+
+[[apps]]
+name        = "Files"
+icon        = "📁"
+module      = "apps.file_manager.file_manager"
+class       = "FileManager"
+description = "Navigate and open files"
+enabled     = true
+
+# --------------------------------------------------------------
+#  Examples: Custom Applications
+# --------------------------------------------------------------
+#
+# 1. Custom Python Plugin (inherits from Rune's App class)
+# [[apps]]
+# name        = "My Plugin"
+# icon        = "⚡"
+# module      = "~/.config/rune/apps/my_plugin.py"
+# class       = "MyPlugin"
+# description = "Custom Python application"
+# enabled     = true
+#
+# 2. Shell / CLI Command (runs inside integrated terminal)
+# [[apps]]
+# name        = "Htop"
+# icon        = "📊"
+# command     = "htop"
+# description = "Interactive system process viewer"
+# enabled     = true

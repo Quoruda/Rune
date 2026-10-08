@@ -1,4 +1,3 @@
-import mimetypes
 from pathlib import Path
 from textual import work
 from textual.app import App, ComposeResult
@@ -11,6 +10,7 @@ from core.window import Window
 from core.workspace import Workspace
 from core.application_launcher import ApplicationLauncher
 from core.registry import APP_REGISTRY
+from core.config import config
 import asyncio
 import json
 import os
@@ -20,28 +20,8 @@ import fcntl
 
 
 def resolve_file_app(file_path: str | Path) -> str:
-    path_str = str(file_path)
-    ext = os.path.splitext(path_str)[1].lower()
-
-    if ext in ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp']:
-        return "viewer"
-    elif ext in ['.mp3', '.wav', '.ogg', '.flac', '.m4a']:
-        return "player"
-    elif ext in ['.mp4', '.mkv', '.avi', '.mov', '.webm']:
-        return "watcher"
-    elif ext in ['.txt', '.py', '.rs', '.md', '.json', '.toml', '.yaml', '.yml', '.sh', '.js', '.ts', '.css', '.html']:
-        return "editor"
-    else:
-        mimetypes.init()
-        mime_type, _ = mimetypes.guess_type(path_str)
-        if mime_type:
-            if mime_type.startswith("image/"):
-                return "viewer"
-            elif mime_type.startswith("audio/"):
-                return "player"
-            elif mime_type.startswith("video/"):
-                return "watcher"
-        return "editor"
+    """Resolve which application should open a given file (config-driven)."""
+    return config.resolve_file_app(file_path) or "Editor"
 
 class Rune(App):
     ENABLE_COMMAND_PALETTE = False
@@ -63,7 +43,8 @@ class Rune(App):
         Binding("ctrl+left", "navigate('left')", show=False, priority=True),
         Binding("ctrl+right", "navigate('right')", show=False, priority=True),
         Binding("ctrl+p", "show_launcher()", show=False, priority=True),
-        Binding("ctrl+z", "toggle_zoom()", show=False, priority=True),
+        Binding("ctrl+z", "toggle_zoom()", show=False, priority=False),
+        Binding("alt+z", "toggle_zoom()", show=False, priority=True),
         Binding("ctrl+w", "close_active_window()", show=False, priority=True),
     ]
 
@@ -137,13 +118,16 @@ class Rune(App):
         if isinstance(self.screen, ApplicationLauncher):
             return
 
+        # Reload config.toml so new apps / changes are picked up instantly
+        config.reload()
+
         def handle_selection(app_entry: dict | None) -> None:
             if app_entry:
                 new_app = app_entry["class"]()
                 self.manager.add_application(new_app)
                 new_app.focus()
 
-        self.push_screen(ApplicationLauncher(APP_REGISTRY), handle_selection)
+        self.push_screen(ApplicationLauncher(config.app_registry), handle_selection)
 
     def action_toggle_zoom(self) -> None:
         focused = self.focused

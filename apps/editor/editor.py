@@ -1,18 +1,14 @@
 import os
-from textual.widgets import TextArea, Input
+from pathlib import Path
+from textual.widgets import TextArea, Input, Label, Button
 from textual.screen import ModalScreen
-from textual.containers import Vertical
+from textual.containers import Vertical, Horizontal
 from textual.app import ComposeResult
 from textual.binding import Binding
 from core.window import Window
-from tree_sitter import Language
 
 
-
-from textual.widgets import Label, Button
-from textual.containers import Horizontal
-
-class ConfirmCloseModal(ModalScreen):
+class ConfirmCloseModal(ModalScreen[bool | None]):
     BINDINGS = [
         ("left", "focus_left", "Left"),
         ("right", "focus_right", "Right"),
@@ -48,6 +44,7 @@ class ConfirmCloseModal(ModalScreen):
         margin: 0 1;
     }
     """
+
     def compose(self) -> ComposeResult:
         with Vertical(id="confirm-box"):
             yield Label("⚠️ Modifications non enregistrées. Voulez-vous sauvegarder ?", id="confirm-label")
@@ -88,7 +85,8 @@ class ConfirmCloseModal(ModalScreen):
         else:
             self.dismiss(None)
 
-class SaveAsModal(ModalScreen):
+
+class SaveAsModal(ModalScreen[str | None]):
     DEFAULT_CSS = """
     SaveAsModal {
         align: center middle;
@@ -127,6 +125,40 @@ class SaveAsModal(ModalScreen):
             self.dismiss(None)
 
 
+class EditorTextArea(TextArea):
+    """TextArea enrichi avec les raccourcis classiques d'édition (Undo, Redo, Select All)."""
+
+    BINDINGS = [
+        Binding("ctrl+a", "select_all", "Select All", priority=True),
+        Binding("ctrl+z", "undo", "Undo", priority=True),
+        Binding("ctrl+y", "redo", "Redo", priority=True),
+        Binding("ctrl+shift+z", "redo", "Redo", priority=True),
+        Binding("ctrl+l", "select_line", "Select Line", priority=True),
+    ]
+
+
+# Mapping des extensions courantes vers les grammaires déjà intégrées nativement dans Textual
+BUILTIN_EXTENSIONS: dict[str, str] = {
+    ".py": "python",
+    ".rs": "rust",
+    ".js": "javascript",
+    ".ts": "javascript",
+    ".json": "json",
+    ".toml": "toml",
+    ".yaml": "yaml",
+    ".yml": "yaml",
+    ".md": "markdown",
+    ".sh": "bash",
+    ".bash": "bash",
+    ".html": "html",
+    ".css": "css",
+    ".xml": "xml",
+    ".sql": "sql",
+    ".java": "java",
+    ".go": "go",
+}
+
+
 class TextEditor(Window):
     BINDINGS = [
         Binding("ctrl+s", "save_file", "Save"),
@@ -134,7 +166,7 @@ class TextEditor(Window):
     ]
 
     DEFAULT_CSS = """
-    TextEditor TextArea, TextEditor TextArea:focus {
+    TextEditor EditorTextArea, TextEditor EditorTextArea:focus {
         border: none;
         height: 100%;
         width: 100%;
@@ -144,47 +176,9 @@ class TextEditor(Window):
     def __init__(self, *args, **kwargs):
         super().__init__("Editor", "📝")
         self.file_path = args[0] if args else None
-        self.text_area = TextArea(show_line_numbers=True)
+        self.text_area = EditorTextArea(show_line_numbers=True)
         self.text_area.theme = "vscode_dark"
         self.text_area.tab_behavior = "indent"
-
-        self._language_mapping = {
-            ".py": "python", ".rs": "rust", ".json": "json",
-            ".md": "markdown", ".toml": "toml", ".yaml": "yaml",
-            ".sh": "bash", ".c": "c", ".h": "c", ".cpp": "cpp",
-            ".hpp": "cpp", ".js": "javascript", ".ts": "javascript",
-            ".html": "html", ".css": "css", ".xml": "xml",
-            ".go": "go", ".java": "java", ".sql": "sql",
-        }
-
-        self._load_user_languages()
-
-        try:
-            import tree_sitter_c
-            _root = os.path.dirname(os.path.abspath(__file__))
-            with open(os.path.join(_root, "c_highlights.scm"), "r") as f:
-                self.text_area.register_language("c", Language(tree_sitter_c.language()), f.read())
-        except Exception:
-            pass
-
-        self._language_mapping = {
-            ".py": "python", ".rs": "rust", ".json": "json",
-            ".md": "markdown", ".toml": "toml", ".yaml": "yaml",
-            ".sh": "bash", ".c": "c", ".h": "c", ".cpp": "cpp",
-            ".hpp": "cpp", ".js": "javascript", ".ts": "javascript",
-            ".html": "html", ".css": "css", ".xml": "xml",
-            ".go": "go", ".java": "java", ".sql": "sql",
-        }
-
-        self._load_user_languages()
-
-        try:
-            import tree_sitter_cpp
-            _root = os.path.dirname(os.path.abspath(__file__))
-            with open(os.path.join(_root, "cpp_highlights.scm"), "r") as f:
-                self.text_area.register_language("cpp", Language(tree_sitter_cpp.language()), f.read())
-        except Exception:
-            pass
 
         self._original_text = ""
         self._is_dirty = False
@@ -216,61 +210,15 @@ class TextEditor(Window):
         indicator = " * " if self._is_dirty else ""
         self.border_title = f"📝 Editor - {base}{indicator}"
 
-
-    def _load_user_languages(self) -> None:
-        import json
-        import importlib
-        config_dir = os.path.expanduser("~/.config/rune/languages")
-        if not os.path.exists(config_dir):
-            try:
-                os.makedirs(config_dir, exist_ok=True)
-            except Exception:
-                return
-
-        for plugin_folder in os.listdir(config_dir):
-            folder_path = os.path.join(config_dir, plugin_folder)
-            if not os.path.isdir(folder_path):
-                continue
-            
-            config_path = os.path.join(folder_path, "config.json")
-            highlights_path = os.path.join(folder_path, "highlights.scm")
-            
-            if os.path.exists(config_path) and os.path.exists(highlights_path):
-                try:
-                    with open(config_path, "r", encoding="utf-8") as f:
-                        config = json.load(f)
-                    
-                    exts = config.get("extensions", [])
-                    if "extension" in config and config["extension"] not in exts:
-                        exts.append(config["extension"])
-                    
-                    module_name = config.get("module")
-                    lang_name = config.get("name", plugin_folder)
-                    
-                    if not exts or not module_name:
-                        continue
-                        
-                    lang_module = importlib.import_module(module_name)
-                    
-                    with open(highlights_path, "r", encoding="utf-8") as f:
-                        query = f.read()
-                    
-                    language_obj = Language(lang_module.language())
-                    self.text_area.register_language(language_obj.name, language_obj, query)
-                    
-                    # Register extensions
-                    for ext in exts:
-                        self._language_mapping[ext] = language_obj.name
-                except Exception as e:
-                    pass
-
     def _detect_language(self) -> None:
         if not self.file_path:
             return
         _, ext = os.path.splitext(self.file_path)
-        lang = self._language_mapping.get(ext.lower())
-        if lang:
+        lang = BUILTIN_EXTENSIONS.get(ext.lower())
+        if lang and lang in self.text_area.available_languages:
             self.text_area.language = lang
+        else:
+            self.text_area.language = None
 
     def action_save_file(self) -> None:
         if self.file_path:
@@ -293,10 +241,11 @@ class TextEditor(Window):
             self._update_title()
         except OSError:
             pass
+
     async def confirm_close(self) -> bool:
         if not self._is_dirty:
             return True
-        
+
         result = await self.app.push_screen_wait(ConfirmCloseModal())
         if result is True:  # Save
             if self.file_path:
@@ -316,9 +265,18 @@ class TextEditor(Window):
 
     def action_dedent(self) -> None:
         start, end = self.text_area.selection
-        line_obj = self.text_area.get_line(start[0])
-        line_str = getattr(line_obj, "plain", str(line_obj))
-        if line_str.startswith("    "):
-            self.text_area.replace("", (start[0], 0), (start[0], 4))
-        elif line_str.startswith("\t"):
-            self.text_area.replace("", (start[0], 0), (start[0], 1))
+        start_line = min(start[0], end[0])
+        end_line = max(start[0], end[0])
+
+        for line_idx in range(start_line, end_line + 1):
+            line_obj = self.text_area.get_line(line_idx)
+            line_str = getattr(line_obj, "plain", str(line_obj))
+            if line_str.startswith("    "):
+                self.text_area.replace("", (line_idx, 0), (line_idx, 4))
+            elif line_str.startswith("\t"):
+                self.text_area.replace("", (line_idx, 0), (line_idx, 1))
+            elif line_str.startswith(" "):
+                spaces = len(line_str) - len(line_str.lstrip(" "))
+                to_remove = min(spaces, 4)
+                if to_remove > 0:
+                    self.text_area.replace("", (line_idx, 0), (line_idx, to_remove))

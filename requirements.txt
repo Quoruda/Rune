@@ -1,5 +1,4 @@
 textual[syntax]
 pillow
 opencv-python
-maturintree-sitter-c
-tree-sitter-cpp
+maturin
