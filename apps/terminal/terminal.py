@@ -31,31 +31,53 @@ class PTYWidget(Window):
 
         self._terminal = TerminalEngine(cols, rows)
 
-        self.master_fd, slave_fd = pty.openpty()
+        self.master_fd, self.slave_fd = pty.openpty()
         self._set_pty_size(rows, cols)
 
         fl = fcntl.fcntl(self.master_fd, fcntl.F_GETFL)
         fcntl.fcntl(self.master_fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
 
+        self._loop = asyncio.get_running_loop()
+        self._loop.add_reader(self.master_fd, self._on_pty_read)
+
+        # Defer spawn until Textual completes the initial layout
+        self.call_after_refresh(self._spawn_process_if_needed)
+
+    def _spawn_process_if_needed(self) -> None:
+        if self.process is None and getattr(self, "slave_fd", None) is not None:
+            rows = self.content_size.height or 24
+            cols = self.content_size.width or 80
+            self._spawn_process(rows, cols)
+
+    def _spawn_process(self, rows: int, cols: int) -> None:
+        self._terminal.resize(cols, rows)
+        self._set_pty_size(rows, cols)
+
         env = os.environ.copy()
         env["RUNE_SOCKET"] = "/tmp/rune.sock"
         env["USER"] = "rune"
         env["LOGNAME"] = "rune"
+        env["TERM"] = "xterm-256color"
         env["PROMPT_COMMAND"] = "PS1='\\[\\033[1;36m\\]rune\\[\\033[0m\\]:\\[\\033[1;34m\\]\\W\\[\\033[0m\\]$ '"
 
         bin_dir = os.path.abspath("bin")
         env["PATH"] = f"{bin_dir}:{env.get('PATH', '')}"
 
+        def child_setup():
+            os.setsid()
+            try:
+                fcntl.ioctl(self.slave_fd, termios.TIOCSCTTY, 0)
+            except OSError:
+                pass
+
         self.process = subprocess.Popen(
             self.command,
-            stdin=slave_fd, stdout=slave_fd, stderr=slave_fd,
-            close_fds=True, start_new_session=True,
+            stdin=self.slave_fd, stdout=self.slave_fd, stderr=self.slave_fd,
+            close_fds=True, preexec_fn=child_setup,
             env=env
         )
-        os.close(slave_fd)
-
-        self._loop = asyncio.get_running_loop()
-        self._loop.add_reader(self.master_fd, self._on_pty_read)
+        os.close(self.slave_fd)
+        self.slave_fd = None
 
     def _on_pty_read(self) -> None:
         try:
@@ -74,8 +96,11 @@ class PTYWidget(Window):
             cols = self.content_size.width
 
             if rows > 0 and cols > 0:
-                self._terminal.resize(cols, rows)
-                self._set_pty_size(rows, cols)
+                if self.process is None:
+                    self._spawn_process_if_needed()
+                else:
+                    self._terminal.resize(cols, rows)
+                    self._set_pty_size(rows, cols)
                 self.refresh()
 
     async def on_unmount(self) -> None:
