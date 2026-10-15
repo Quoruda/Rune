@@ -31,6 +31,7 @@ autostart = ["Terminal"]
 ".ts"   = "Editor"
 ".css"  = "Editor"
 ".html" = "Editor"
+".pdf"  = "PdfViewer"
 
 ".png"  = "Viewer"
 ".jpg"  = "Viewer"
@@ -134,3 +135,11 @@ enabled     = true
 # command     = "htop"
 # description = "Interactive system process viewer"
 # enabled     = true
+
+[[apps]]
+name        = "PdfViewer"
+icon        = "📄"
+module      = "apps.pdf_viewer.pdf_viewer"
+class       = "PdfViewer"
+description = "High-performance PDF document viewer"
+enabled     = true
